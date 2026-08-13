@@ -1,0 +1,15 @@
+clipboard-read = allow
+
+font-family = Menlo
+font-size = 16
+
+window-decoration = none
+macos-titlebar-style = hidden
+
+# theme = dark:rose-pine,light:rose-pine-dawn
+theme = dark:TokyoNight,light:TokyoNight Day
+
+macos-option-as-alt = true
+
+# tmux replacement alternative
+# https://sterba.dev/posts/replacing-tmux/
