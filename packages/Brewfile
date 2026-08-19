@@ -1,0 +1,5 @@
+brew "stow"
+
+cask "bitwarden"
+cask "ghostty"
+cask "raycast"
