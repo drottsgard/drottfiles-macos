@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+DOTFILES_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+usage() {
+	echo "Usage: ./dot <command>"
+	echo ""
+	echo "Commands:"
+	echo "  stow    Symlink home/ into \$HOME"
+	echo "  help    Show this help"
+}
+
+command="${1:-help}"
+
+case "$command" in
+	stow)
+		if ! command -v stow &> /dev/null; then
+			echo "stow is not installed. Install it with: brew install stow" >&2
+			exit 1
+		fi
+
+		echo "Stowing home into $HOME..."
+		stow --dir="$DOTFILES_DIR" --target="$HOME" home
+		echo "Home dotfiles stowed successfully"
+		;;
+	help|-h|--help)
+		usage
+		;;
+	*)
+		echo "Unknown command: $command" >&2
+		usage >&2
+		exit 1
+		;;
+esac
