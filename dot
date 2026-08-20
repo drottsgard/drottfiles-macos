@@ -8,8 +8,54 @@ usage() {
 	echo "Usage: ./dot <command>"
 	echo ""
 	echo "Commands:"
-	echo "  stow    Symlink home/ into \$HOME"
-	echo "  help    Show this help"
+	echo "  stow                         Symlink home/ into \$HOME"
+	echo "  package install              Install packages from packages/Brewfile"
+	echo "  package add <name> [...]     Install formulae and add them to the Brewfile"
+	echo "  package add --cask <name>    Install casks and add them to the Brewfile"
+	echo "  help                         Show this help"
+}
+
+sort_brewfile() {
+	local brewfile="$1"
+	local sort_dir
+	sort_dir="$(mktemp -d "${TMPDIR:-/tmp}/dot-brewfile.XXXXXX")"
+
+	while IFS= read -r line || [ -n "$line" ]; do
+		case "$line" in
+			brew\ \"*)
+				echo "$line" >> "$sort_dir/formulae"
+				;;
+			cask\ \"*)
+				echo "$line" >> "$sort_dir/casks"
+				;;
+			"")
+				;;
+			*)
+				echo "$line" >> "$sort_dir/other"
+				;;
+		esac
+	done < "$brewfile"
+
+	{
+		if [ -f "$sort_dir/other" ]; then
+			cat "$sort_dir/other"
+			if [ -f "$sort_dir/formulae" ] || [ -f "$sort_dir/casks" ]; then
+				echo ""
+			fi
+		fi
+		if [ -f "$sort_dir/formulae" ]; then
+			LC_ALL=C sort "$sort_dir/formulae"
+		fi
+		if [ -f "$sort_dir/formulae" ] && [ -f "$sort_dir/casks" ]; then
+			echo ""
+		fi
+		if [ -f "$sort_dir/casks" ]; then
+			LC_ALL=C sort "$sort_dir/casks"
+		fi
+	} > "$sort_dir/Brewfile"
+
+	mv "$sort_dir/Brewfile" "$brewfile"
+	rm -rf "$sort_dir"
 }
 
 command="${1:-help}"
@@ -24,6 +70,44 @@ case "$command" in
 		echo "Stowing home into $HOME..."
 		stow --dir="$DOTFILES_DIR" --target="$HOME" home
 		echo "Home dotfiles stowed successfully"
+		;;
+	package|packages)
+		if [ -f /opt/homebrew/bin/brew ]; then
+			eval "$(/opt/homebrew/bin/brew shellenv)"
+		elif [ -f /usr/local/bin/brew ]; then
+			eval "$(/usr/local/bin/brew shellenv)"
+		fi
+
+		if ! command -v brew &> /dev/null; then
+			echo "Homebrew is not installed. Run ./bootstrap/install/homebrew.sh first." >&2
+			exit 1
+		fi
+
+		package_command="${2:-install}"
+		case "$package_command" in
+			install)
+				echo "Installing packages from packages/Brewfile..."
+				brew bundle --file="$DOTFILES_DIR/packages/Brewfile"
+				echo "Packages installed successfully"
+				;;
+			add)
+				shift 2
+				if [ "$#" -eq 0 ]; then
+					echo "Usage: ./dot package add [--cask] <name> [...]" >&2
+					exit 1
+				fi
+
+				echo "Installing and adding packages to packages/Brewfile..."
+				brew bundle add --install --no-describe --file="$DOTFILES_DIR/packages/Brewfile" "$@"
+				sort_brewfile "$DOTFILES_DIR/packages/Brewfile"
+				echo "Packages added and Brewfile sorted successfully"
+				;;
+			*)
+				echo "Unknown package command: $package_command" >&2
+				echo "Usage: ./dot package <install|add>" >&2
+				exit 1
+				;;
+		esac
 		;;
 	help|-h|--help)
 		usage
