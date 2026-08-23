@@ -1,9 +1,14 @@
 local root_markers = {
-  'package-lock.json',
-  'yarn.lock',
-  'pnpm-lock.yaml',
-  'bun.lock',
-  'bun.lockb',
+  { 'tsconfig.json', 'jsconfig.json' },
+  'package.json',
+  {
+    'pnpm-workspace.yaml',
+    'pnpm-lock.yaml',
+    'package-lock.json',
+    'yarn.lock',
+    'bun.lock',
+    'bun.lockb',
+  },
   '.git',
 }
 
