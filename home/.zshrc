@@ -53,3 +53,5 @@ fi
 	source "$HOME/zsh/zsh-autosuggestions/zsh-autosuggestions.zsh"
 [[ -r "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh" ]] && \
 	source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+[[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
