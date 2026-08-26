@@ -6,6 +6,8 @@
 *.secrets
 credentials.json
 
+*.local
+
 # Nested git repos (managed separately)
 dotfiles/.config/kickstart.nvim/
 
