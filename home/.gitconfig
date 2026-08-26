@@ -1,0 +1,11 @@
+# This is Git's per-user configuration file.
+[core]
+	editor = nvim
+[pull]
+	rebase = true
+
+[includeIf "gitdir:~/dev/drottsgard/"]
+	path = ~/dev/drottsgard/.gitconfig
+
+[include]
+	path = ~/.gitconfig.local
