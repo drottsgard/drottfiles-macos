@@ -8,7 +8,8 @@ Dotfiles for a macOS development workstation. This repository has no repo-wide b
 - `home/.config/` — application configuration
 - `home/.pi/` — pi settings, extensions, and skills
 - `packages/Brewfile` — Homebrew formulae and casks
-- `dot` — helper for stowing dotfiles and managing the Brewfile
+- `scripts/` — idempotent workstation setup scripts
+- `dot` — helper for stowing dotfiles, managing the Brewfile, and running workstation setup
 
 ## Commands
 
@@ -17,6 +18,7 @@ Dotfiles for a macOS development workstation. This repository has no repo-wide b
 ./dot package install              # Install packages from packages/Brewfile
 ./dot package add <name> [...]     # Install formulae and update the Brewfile
 ./dot package add --cask <name>    # Install casks and update the Brewfile
+./dot colima setup                 # Configure and start the Colima Docker runtime
 ./dot help
 ```
 
@@ -36,6 +38,8 @@ Files matching `*.local` are ignored. `home/.zshrc` loads `~/.zshrc.local` for m
 ## Packages
 
 Use `./dot package add <name>` or `./dot package add --cask <name>` for packages that should remain in `packages/Brewfile`. The helper installs the package and sorts formulae and casks into stable groups. Use `./dot package install` to reconcile a workstation with the Brewfile.
+
+Colima changes: read `docs/colima.md` before changing container packages, runtime setup, Docker CLI plugin discovery, or credential storage.
 
 ## Shell conventions
 
