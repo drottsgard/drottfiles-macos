@@ -21,12 +21,9 @@ Apply these standards to the behavior being changed. Repository-specific instruc
 
 - Parse external data at the edge.
 - Make invalid states difficult to represent.
-- Model distinct variants separately rather than weakening one shared type with optional fields or broad unions.
 - Keep expected failures explicit.
 - Prefer a functional core with an imperative shell.
 - Design deep, cohesive modules with small interfaces.
-- Prefer one authoritative model per semantic shape. Add a transport model only when the transport representation genuinely differs.
-- Use the named domain or persistence type when it is known; avoid annotations derived from incidental containers such as `(typeof rows)[number]`.
 - Require every abstraction to pass the deletion test: removing it should make necessary complexity reappear rather than disappear.
 - Keep dependencies and side effects at clear seams.
 - Validate with the repository's established mechanisms.
