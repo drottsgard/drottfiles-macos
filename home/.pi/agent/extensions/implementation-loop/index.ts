@@ -3,6 +3,7 @@ import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 import type { ExtensionAPI, ExtensionCommandContext } from "@earendil-works/pi-coding-agent";
 import { BorderedLoader } from "@earendil-works/pi-coding-agent";
+import { Container, Text } from "@earendil-works/pi-tui";
 import { PiAgentRunner } from "./agent-runner";
 import { parseImplementorResult, parseReviewerResult, type TerminalOutcome } from "./contracts";
 import { GitSnapshots } from "./git-snapshot";
@@ -48,9 +49,10 @@ export default function implementationLoopExtension(pi: ExtensionAPI) {
 				const runner = new PiAgentRunner();
 				const model = ctx.model ? `${ctx.model.provider}/${ctx.model.id}` : undefined;
 				const standardsSection = `\n\n<general-coding-standards>\n${codingStandards}\n</general-coding-standards>`;
-				const execute = () =>
+				const execute = (onProgress: (message: string) => void) =>
 					runImplementationLoop(brief.value, {
 						signal: controller.signal,
+						onProgress,
 						captureTree: () => snapshots!.capture(controller.signal),
 						diffTrees: (baseline, current) => snapshots!.diff(baseline, current, controller.signal),
 						invokeImplementor: async (task) => {
@@ -62,6 +64,7 @@ export default function implementationLoopExtension(pi: ExtensionAPI) {
 								model,
 								thinkingLevel: ctx.thinkingLevel,
 								signal: controller.signal,
+								onProgress: (message) => onProgress(`Implementor: ${message}`),
 							});
 							return parseImplementorResult(result.finalText);
 						},
@@ -74,6 +77,7 @@ export default function implementationLoopExtension(pi: ExtensionAPI) {
 								model,
 								thinkingLevel: ctx.thinkingLevel,
 								signal: controller.signal,
+								onProgress: (message) => onProgress(`Reviewer: ${message}`),
 							});
 							return parseReviewerResult(result.finalText);
 						},
@@ -114,18 +118,45 @@ async function resolveBrief(args: string, cwd: string): Promise<{ ok: true; valu
 }
 
 async function runWithCancellationUi(
-	execute: () => Promise<TerminalOutcome>,
+	execute: (onProgress: (message: string) => void) => Promise<TerminalOutcome>,
 	controller: AbortController,
 	ctx: ExtensionCommandContext,
 ): Promise<TerminalOutcome> {
-	if (ctx.mode !== "tui") return execute();
+	if (ctx.mode !== "tui") return execute(() => {});
 	return ctx.ui.custom<TerminalOutcome>((tui, theme, _keybindings, done) => {
 		const loader = new BorderedLoader(tui, theme, "Running implementation loop (Esc to cancel)...");
+		const progressText = new Text("", 1, 0);
+		const container = new Container();
+		container.addChild(loader);
+		container.addChild(progressText);
+		const startedAt = Date.now();
+		const progress: string[] = [];
+		const reportProgress = (message: string) => {
+			const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000);
+			const timestamp = `${Math.floor(elapsedSeconds / 60)}:${String(elapsedSeconds % 60).padStart(2, "0")}`;
+			progress.push(`${timestamp}  ${message}`);
+			if (progress.length > 12) progress.shift();
+			progressText.setText(
+				progress
+					.map((line, index) =>
+						index === progress.length - 1 ? theme.fg("accent", `› ${line}`) : theme.fg("dim", `  ${line}`),
+					)
+					.join("\n"),
+			);
+			tui.requestRender();
+		};
+
 		loader.onAbort = () => controller.abort();
-		execute().then(done).catch((error) => {
+		reportProgress("Preparing workflow");
+		execute(reportProgress).then(done).catch((error) => {
 			done({ status: "FAILED", reason: error instanceof Error ? error.message : String(error) });
 		});
-		return loader;
+		return {
+			render: (width: number) => container.render(width),
+			handleInput: (data: string) => loader.handleInput(data),
+			invalidate: () => container.invalidate(),
+			dispose: () => loader.dispose(),
+		};
 	});
 }
 

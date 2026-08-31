@@ -16,6 +16,8 @@ IMPLEMENT
 
 The agents use separate context windows and the same working tree. The Reviewer does not modify files, run validation, or assess whether the original build request was fully satisfied.
 
+While the command runs in the TUI, its progress panel shows workflow transitions and a rolling view of each agent's tool activity. Press Esc to cancel.
+
 ## Agents
 
 | Agent | Responsibility | Tools |

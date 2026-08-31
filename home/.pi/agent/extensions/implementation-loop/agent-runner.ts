@@ -15,6 +15,7 @@ export interface AgentInvocation {
 	model?: string;
 	thinkingLevel?: ThinkingLevel;
 	signal: AbortSignal;
+	onProgress?: (message: string) => void;
 }
 
 export interface AgentInvocationResult {
@@ -31,6 +32,13 @@ interface AssistantMessage {
 	content?: Array<{ type?: string; text?: string }>;
 	stopReason?: string;
 	errorMessage?: string;
+}
+
+interface JsonEvent {
+	type?: string;
+	message?: AssistantMessage;
+	toolName?: string;
+	args?: Record<string, unknown>;
 }
 
 const DEFAULT_TIMEOUT_MS = 30 * 60 * 1000;
@@ -83,14 +91,18 @@ export class PiAgentRunner {
 
 			const processLine = (line: string) => {
 				if (!line.trim()) return;
-				let event: { type?: string; message?: AssistantMessage };
+				let event: JsonEvent;
 				try {
 					event = JSON.parse(line);
 				} catch {
 					return;
 				}
+				if (event.type === "tool_execution_start" && event.toolName) {
+					invocation.onProgress?.(formatToolActivity(event.toolName, event.args ?? {}));
+				}
 				if (event.type === "message_end" && event.message?.role === "assistant") {
 					messages.push(event.message);
+					invocation.onProgress?.("completed a model turn");
 				}
 			};
 
@@ -141,6 +153,29 @@ export class PiAgentRunner {
 			.join("\n");
 		return { finalText, diagnostics: stderr.trim() ? [stderr.trim()] : [] };
 	}
+}
+
+function formatToolActivity(toolName: string, args: Record<string, unknown>): string {
+	const path = typeof args.path === "string" ? args.path : undefined;
+	switch (toolName) {
+		case "bash": {
+			const command = typeof args.command === "string" ? args.command.replace(/\s+/g, " ").trim() : "";
+			return `$ ${truncate(command || "command", 80)}`;
+		}
+		case "read":
+		case "write":
+		case "edit":
+		case "grep":
+		case "find":
+		case "ls":
+			return `${toolName} ${truncate(path ?? "…", 80)}`;
+		default:
+			return toolName;
+	}
+}
+
+function truncate(value: string, maximumLength: number): string {
+	return value.length > maximumLength ? `${value.slice(0, maximumLength - 1)}…` : value;
 }
 
 function getPiInvocation(args: string[]): { command: string; args: string[] } {

@@ -12,6 +12,7 @@ export interface ImplementationLoopDependencies {
 	diffTrees(baselineTree: string, currentTree: string): Promise<RunDiff>;
 	signal: AbortSignal;
 	maxReviewRevisions?: number;
+	onProgress?: (message: string) => void;
 }
 
 type InvocationResult<T> =
@@ -25,6 +26,7 @@ export async function runImplementationLoop(
 	const maxReviewRevisions = dependencies.maxReviewRevisions ?? 3;
 	let baselineTree: string;
 	try {
+		dependencies.onProgress?.("Capturing baseline repository snapshot");
 		baselineTree = await dependencies.captureTree();
 	} catch (error) {
 		return {
@@ -46,9 +48,11 @@ export async function runImplementationLoop(
 	};
 
 	try {
+		dependencies.onProgress?.("Starting initial implementation");
 		const implementation = await invokeWithRetry(
 			() => dependencies.invokeImplementor(buildInitialTask(buildBrief)),
 			dependencies.signal,
+			(attempt) => dependencies.onProgress?.(`Implementor retry ${attempt}/2`),
 		);
 		if (!implementation.ok) {
 			await refreshDiff();
@@ -59,6 +63,7 @@ export async function runImplementationLoop(
 			});
 		}
 		latestImplementor = implementation.value;
+		dependencies.onProgress?.("Implementation completed; capturing filesystem changes");
 		await refreshDiff();
 		if (latestImplementor.status === "BLOCKED") {
 			return humanRequired("Implementor is blocked", currentDiff, {
@@ -69,9 +74,11 @@ export async function runImplementationLoop(
 		}
 
 		while (true) {
+			dependencies.onProgress?.(`Starting review ${reviewRevisionCount + 1}`);
 			const review = await invokeWithRetry(
 				() => dependencies.invokeReviewer(buildReviewTask(currentDiff, latestImplementor!)),
 				dependencies.signal,
+				(attempt) => dependencies.onProgress?.(`Reviewer retry ${attempt}/2`),
 			);
 			if (!review.ok) {
 				await refreshDiff();
@@ -84,6 +91,7 @@ export async function runImplementationLoop(
 			latestReviewer = review.value;
 
 			if (latestReviewer.verdict === "APPROVED") {
+				dependencies.onProgress?.("Reviewer approved the implementation");
 				return {
 					status: "APPROVED",
 					reviewRevisionCount,
@@ -102,10 +110,14 @@ export async function runImplementationLoop(
 				});
 			}
 
+			dependencies.onProgress?.(
+				`Review requested ${latestReviewer.blockingFindings.length} blocking change(s); starting revision ${reviewRevisionCount + 1}/${maxReviewRevisions}`,
+			);
 			const revisionTask = buildRevisionTask(buildBrief, latestReviewer, currentDiff);
 			const revision = await invokeWithRetry(
 				() => dependencies.invokeImplementor(revisionTask),
 				dependencies.signal,
+				(attempt) => dependencies.onProgress?.(`Revision Implementor retry ${attempt}/2`),
 			);
 			if (!revision.ok) {
 				await refreshDiff();
@@ -139,10 +151,15 @@ export async function runImplementationLoop(
 	}
 }
 
-async function invokeWithRetry<T>(operation: () => Promise<T>, signal: AbortSignal): Promise<InvocationResult<T>> {
+async function invokeWithRetry<T>(
+	operation: () => Promise<T>,
+	signal: AbortSignal,
+	onRetry?: (attempt: number) => void,
+): Promise<InvocationResult<T>> {
 	const diagnostics: string[] = [];
 	for (let invocationAttempt = 1; invocationAttempt <= 2; invocationAttempt += 1) {
 		signal.throwIfAborted();
+		if (invocationAttempt > 1) onRetry?.(invocationAttempt);
 		try {
 			return { ok: true, value: await operation() };
 		} catch (error) {
