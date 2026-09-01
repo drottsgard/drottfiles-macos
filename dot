@@ -13,6 +13,7 @@ usage() {
 	echo "  package add <name> [...]     Install formulae and add them to the Brewfile"
 	echo "  package add --cask <name>    Install casks and add them to the Brewfile"
 	echo "  colima setup                 Configure and start the Colima Docker runtime"
+	echo "  bun install                  Install or update Bun"
 	echo "  opencode install             Install or update the OpenCode 2 beta"
 	echo "  help                         Show this help"
 }
@@ -120,6 +121,26 @@ case "$command" in
 			*)
 				echo "Unknown Colima command: $colima_command" >&2
 				echo "Usage: ./dot colima setup" >&2
+				exit 1
+				;;
+		esac
+		;;
+	bun)
+		bun_command="${2:-install}"
+		case "$bun_command" in
+			install)
+				if ! command -v curl &> /dev/null; then
+					echo "curl is required to install Bun." >&2
+					exit 1
+				fi
+
+				echo "Installing Bun..."
+				curl -fsSL https://bun.com/install | bash
+				echo "Bun installed successfully"
+				;;
+			*)
+				echo "Unknown Bun command: $bun_command" >&2
+				echo "Usage: ./dot bun install" >&2
 				exit 1
 				;;
 		esac
