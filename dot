@@ -13,6 +13,7 @@ usage() {
 	echo "  package add <name> [...]     Install formulae and add them to the Brewfile"
 	echo "  package add --cask <name>    Install casks and add them to the Brewfile"
 	echo "  colima setup                 Configure and start the Colima Docker runtime"
+	echo "  opencode install             Install or update the OpenCode 2 beta"
 	echo "  help                         Show this help"
 }
 
@@ -119,6 +120,30 @@ case "$command" in
 			*)
 				echo "Unknown Colima command: $colima_command" >&2
 				echo "Usage: ./dot colima setup" >&2
+				exit 1
+				;;
+		esac
+		;;
+	opencode)
+		opencode_command="${2:-install}"
+		case "$opencode_command" in
+			install)
+				if [ -x "$HOME/.bun/bin/bun" ]; then
+					bun="$HOME/.bun/bin/bun"
+				elif command -v bun &> /dev/null; then
+					bun="$(command -v bun)"
+				else
+					echo "Bun is not installed. Run ./dot bun install first." >&2
+					exit 1
+				fi
+
+				echo "Installing OpenCode 2 beta..."
+				"$bun" install -g --trust @opencode-ai/cli@beta
+				echo "OpenCode 2 beta installed successfully"
+				;;
+			*)
+				echo "Unknown OpenCode command: $opencode_command" >&2
+				echo "Usage: ./dot opencode install" >&2
 				exit 1
 				;;
 		esac
