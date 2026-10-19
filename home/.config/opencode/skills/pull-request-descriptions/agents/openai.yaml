@@ -1,0 +1,5 @@
+interface:
+  display_name: "Pull Request Descriptions"
+  short_description: "Write concise, scope-first PR summaries"
+policy:
+  allow_implicit_invocation: true
