@@ -4,12 +4,27 @@
     "name": "system"
   },
   "diffs": {
-    "wrap": "word"
+    "wrap": "word",
+    "tree": true
   },
   "session": {
-    "sidebar": "auto",
+    "sidebar": "hide",
     "scrollbar": true,
-    "thinking": "hide"
+    "thinking": "hide",
+    "markdown": "rendered",
+    "grouping": "auto",
+    "verbosity": "low"
   },
-  "animations": true
+  "animations": true,
+  "tabs": {
+    "indicators": "status",
+    "layout": "horizontal",
+    "enabled": true
+  },
+  "terminal": {
+    "title": true
+  },
+  "debug": {
+    "devtools": false
+  }
 }

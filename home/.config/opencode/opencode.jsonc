@@ -1,3 +1,26 @@
 {
-  "$schema": "https://opencode.ai/config.json"
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "pencil": {
+        "type": "local",
+        "command": [
+          "/Applications/Pen.app/Contents/Resources/app.asar.unpacked/out/mcp-server-darwin-arm64",
+          "--app",
+          "desktop",
+          "--agent",
+          "openCodeCLI"
+        ]
+      },
+      "rovo": {
+        "type": "remote",
+        "url": "https://mcp.atlassian.com/v2/mcp"
+      },
+      "figma-desktop": {
+        "type": "remote",
+        "url": "http://127.0.0.1:3845/mcp"
+      }
+    }
+  },
+  "shell": "zsh"
 }

@@ -1,1 +1,0 @@
-/Users/drottsgard/.config/opencode/ponytail/.opencode/command/ponytail-gain.md

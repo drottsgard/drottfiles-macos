@@ -23,3 +23,10 @@ Thumbs.db
 home/.pi/agent/sessions/**
 home/.pi/agent/auth.json
 home/.pi/agent/models-store.json
+
+# OpenCode local service credentials and generated dependencies
+home/.config/opencode/service.json
+home/.config/opencode/node_modules/
+home/.config/opencode/package.json
+home/.config/opencode/package-lock.json
+home/.config/opencode/bun.lock

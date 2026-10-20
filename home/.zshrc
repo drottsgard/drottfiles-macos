@@ -21,26 +21,6 @@ fi
 (( $+commands[fzf] )) && source <(fzf --zsh)
 [[ -r "$BUN_INSTALL/_bun" ]] && source "$BUN_INSTALL/_bun"
 
-# OpenCode uses separate configuration for private projects.
-opencode() {
-	local config tui_config
-
-	case "$PWD/" in
-		"$HOME/dev/drottsgard/"*)
-			config="$HOME/.config/opencode/private.jsonc"
-			tui_config="$HOME/.config/opencode/private-tui.json"
-			;;
-		*)
-			config="$HOME/.config/opencode/work.jsonc"
-			tui_config="$HOME/.config/opencode/work-tui.json"
-			;;
-	esac
-
-	OPENCODE_CONFIG="$config" \
-		OPENCODE_TUI_CONFIG="$tui_config" \
-		command opencode "$@"
-}
-
 # AWS ships a Bash-style completer.
 if (( $+commands[aws_completer] )); then
 	autoload -Uz bashcompinit
