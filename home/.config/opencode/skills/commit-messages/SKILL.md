@@ -23,6 +23,39 @@ A commit message is a compact engineering decision record: explain why the chang
 - Use plain language and concrete nouns.
 - Keep the message proportional: omit the body when the title fully preserves the rationale.
 
+## Framing and brevity
+
+- Start with the user or caller's need, then explain why the old behavior did
+  not meet it. Prefer this over leading with an inventory of defects or changes.
+- Describe the outcome in domain language. Avoid response-envelope names,
+  field names, route versions, and storage choices unless they are essential
+  to understanding the decision.
+- Follow with the smallest useful explanation of the chosen approach. Keep a
+  material scope constraint, such as supporting one survey instead of a
+  collection, when it explains the design.
+- Do not turn the body into a miniature PR description or review transcript.
+  Not every discussed tradeoff belongs in the commit message. Include it only
+  when omitting it would leave the change's rationale unclear.
+- When the user approves a revised message, preserve that wording when asked
+  to amend rather than adding details back into it.
+
+### Example
+
+```text
+EL-13740 Identify the caller's pending performance assessment
+
+The survey flow needs to know whether the caller has a self-assessment
+left to complete. Listing active surveys alone includes assessments
+the caller has already submitted.
+
+Return one pending assessment or an explicit absence result. The first
+implementation supports a single survey rather than a collection.
+```
+
+The need comes first, the old behavior explains the gap, and the final
+paragraph captures the approach and its scope. Details about the data envelope,
+route compatibility, and read replicas would distract from this rationale.
+
 ## Quality check
 
 Before presenting or using the message, verify:
