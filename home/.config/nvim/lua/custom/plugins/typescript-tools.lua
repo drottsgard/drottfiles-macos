@@ -1,36 +1,11 @@
-local root_markers = {
-  { 'tsconfig.json', 'jsconfig.json' },
-  'package.json',
-  {
-    'pnpm-workspace.yaml',
-    'pnpm-lock.yaml',
-    'package-lock.json',
-    'yarn.lock',
-    'bun.lock',
-    'bun.lockb',
-  },
-  '.git',
-}
-
-local function get_project_root(bufnr)
-  return vim.fs.root(bufnr, root_markers)
-end
-
 local function has_tsserver(root_dir)
-  return root_dir
-    and vim.fn.filereadable(vim.fs.joinpath(root_dir, 'node_modules', 'typescript', 'lib', 'tsserver.js')) == 1
+  return vim.fn.filereadable(vim.fs.joinpath(root_dir, 'node_modules', 'typescript', 'lib', 'tsserver.js')) == 1
 end
 
 return {
   'pmizio/typescript-tools.nvim',
   dependencies = { 'nvim-lua/plenary.nvim', 'neovim/nvim-lspconfig' },
   opts = {
-    root_dir = function(bufnr, on_dir)
-      local root_dir = get_project_root(bufnr)
-      if has_tsserver(root_dir) then
-        on_dir(root_dir)
-      end
-    end,
     settings = {
       separate_diagnostic_server = true,
       publish_diagnostic_on = 'insert_leave',
@@ -40,6 +15,15 @@ return {
     },
   },
   config = function(_, opts)
+    -- Keep lspconfig's workspace detection; only select the TS version.
+    local workspace_root = vim.lsp.config.tsgo.root_dir
+    opts.root_dir = function(bufnr, on_dir)
+      workspace_root(bufnr, function(root_dir)
+        if has_tsserver(root_dir) then
+          on_dir(root_dir)
+        end
+      end)
+    end
     require('typescript-tools').setup(opts)
 
     vim.lsp.config('tsgo', {
@@ -48,15 +32,12 @@ return {
         return vim.lsp.rpc.start({ tsc, '--lsp', '--stdio' }, dispatchers)
       end,
       root_dir = function(bufnr, on_dir)
-        local root_dir = get_project_root(bufnr)
-        if not root_dir or has_tsserver(root_dir) then
-          return
-        end
-
-        local tsc = vim.fs.joinpath(root_dir, 'node_modules', '.bin', 'tsc')
-        if vim.fn.executable(tsc) == 1 then
-          on_dir(root_dir)
-        end
+        workspace_root(bufnr, function(root_dir)
+          local tsc = vim.fs.joinpath(root_dir, 'node_modules', '.bin', 'tsc')
+          if not has_tsserver(root_dir) and vim.fn.executable(tsc) == 1 then
+            on_dir(root_dir)
+          end
+        end)
       end,
     })
     vim.lsp.enable('tsgo')
