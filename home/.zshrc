@@ -35,3 +35,6 @@ fi
 	source "${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
 [[ -r "$HOME/.zshrc.local" ]] && source "$HOME/.zshrc.local"
+
+# bun completions
+[ -s "/Users/drottsgard/.bun/_bun" ] && source "/Users/drottsgard/.bun/_bun"
