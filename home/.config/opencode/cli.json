@@ -5,26 +5,35 @@
   },
   "diffs": {
     "wrap": "word",
-    "tree": true
+    "tree": true,
+    "fullscreen": true
   },
   "session": {
-    "sidebar": "hide",
+    "sidebar": "auto",
     "scrollbar": true,
     "thinking": "hide",
     "markdown": "rendered",
     "grouping": "auto",
-    "verbosity": "low"
+    "verbosity": "low",
+    "permissions": "prompt",
+    "image_preview": true
   },
   "animations": true,
   "tabs": {
     "indicators": "status",
     "layout": "horizontal",
-    "enabled": true
+    "enabled": true,
+    "mode": "off",
+    "scope": "cwd"
   },
   "terminal": {
     "title": true
   },
   "debug": {
     "devtools": false
+  },
+  "highlights": true,
+  "prompt": {
+    "image_preview": true
   }
 }
