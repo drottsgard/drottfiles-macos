@@ -6,4 +6,4 @@ rex.action{
   run = terminal.open({ "nvim", "." }, "Neovim"),
 }
 
-rex.bind("ctrl+n", "nvim")
+rex.bind("ctrl+b>n", "nvim")

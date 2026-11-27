@@ -6,4 +6,4 @@ rex.action{
   run = terminal.open({ "lazygit" }),
 }
 
-rex.bind("ctrl+l", "lazygit")
+rex.bind("ctrl+b>g", "lazygit")

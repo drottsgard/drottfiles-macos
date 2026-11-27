@@ -18,7 +18,7 @@ local function open_terminal(command, tab_title)
 
     local options = {
       focus = true,
-      layout = rex.layout.block{
+      layout = rex.layout.block {
         flavor = "com.superlogical.terminal.shell",
         options = {
           command = command,
@@ -29,6 +29,7 @@ local function open_terminal(command, tab_title)
     local result, open_err
     if tab_title then
       options.window_label = tab_title
+      options.focus = false
       result, open_err = rex.session.new_window(options)
     else
       options.bounds = { 0.05, 0.05, 0.9, 0.9 }
