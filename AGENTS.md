@@ -14,6 +14,7 @@ Dotfiles for a macOS development workstation. This repository has no repo-wide b
 ## Commands
 
 ```bash
+./dot init                         # Set up Homebrew, install packages, and link dotfiles
 ./dot stow                         # Symlink home/ into $HOME
 ./dot package install              # Install packages from packages/Brewfile
 ./dot package add <name> [...]     # Install formulae and update the Brewfile

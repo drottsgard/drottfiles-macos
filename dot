@@ -8,6 +8,7 @@ usage() {
 	echo "Usage: ./dot <command>"
 	echo ""
 	echo "Commands:"
+	echo "  init                         Set up Homebrew, install packages, and link dotfiles"
 	echo "  stow                         Symlink home/ into \$HOME"
 	echo "  package install              Install packages from packages/Brewfile"
 	echo "  package add <name> [...]     Install formulae and add them to the Brewfile"
@@ -16,6 +17,14 @@ usage() {
 	echo "  bun install                  Install or update Bun"
 	echo "  opencode install             Install or update the OpenCode 2 beta"
 	echo "  help                         Show this help"
+}
+
+load_homebrew() {
+	if [ -f /opt/homebrew/bin/brew ]; then
+		eval "$(/opt/homebrew/bin/brew shellenv)"
+	elif [ -f /usr/local/bin/brew ]; then
+		eval "$(/usr/local/bin/brew shellenv)"
+	fi
 }
 
 sort_brewfile() {
@@ -64,6 +73,18 @@ sort_brewfile() {
 command="${1:-help}"
 
 case "$command" in
+	init)
+		load_homebrew
+		if ! command -v brew &> /dev/null; then
+			echo "Installing Homebrew..."
+			installer="$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+			/bin/bash -c "$installer"
+			load_homebrew
+		fi
+
+		"$DOTFILES_DIR/dot" package install
+		"$DOTFILES_DIR/dot" stow
+		;;
 	stow)
 		if ! command -v stow &> /dev/null; then
 			echo "stow is not installed. Install it with: brew install stow" >&2
@@ -75,14 +96,10 @@ case "$command" in
 		echo "Home dotfiles stowed successfully"
 		;;
 	package|packages)
-		if [ -f /opt/homebrew/bin/brew ]; then
-			eval "$(/opt/homebrew/bin/brew shellenv)"
-		elif [ -f /usr/local/bin/brew ]; then
-			eval "$(/usr/local/bin/brew shellenv)"
-		fi
+		load_homebrew
 
 		if ! command -v brew &> /dev/null; then
-			echo "Homebrew is not installed. Run ./bootstrap/install/homebrew.sh first." >&2
+			echo "Homebrew is not installed. Run ./dot init first." >&2
 			exit 1
 		fi
 

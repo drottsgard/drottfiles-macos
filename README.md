@@ -4,16 +4,13 @@ Personal configuration and Homebrew packages for a macOS development workstation
 
 ## Setup
 
-Install [Homebrew](https://brew.sh/) and follow its shell setup instructions. Then run:
-
 ```sh
-git clone git@github.com:drottsgard/drottfiles-macos.git
+git clone https://github.com/drottsgard/drottfiles-macos.git
 cd drottfiles-macos
-./dot package install
-./dot stow
+./dot init
 ```
 
-Keep the clone in place: GNU Stow links files from `home/` into your home directory. Open a new terminal to load the shell configuration.
+`./dot init` installs Homebrew if needed, installs the packages in `packages/Brewfile`, and links `home/` into your home directory. Keep the clone in place and open a new terminal.
 
 ## Updates
 
