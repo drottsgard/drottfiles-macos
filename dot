@@ -10,6 +10,7 @@ usage() {
 	echo "Commands:"
 	echo "  init                         Set up Homebrew, install packages, and link dotfiles"
 	echo "  stow                         Symlink home/ into \$HOME"
+	echo "  ssh setup <personal|work> [hostname]  Set up a Git SSH identity (default: github.com)"
 	echo "  package install              Install packages from packages/Brewfile"
 	echo "  package add <name> [...]     Install formulae and add them to the Brewfile"
 	echo "  package add --cask <name>    Install casks and add them to the Brewfile"
@@ -128,6 +129,15 @@ case "$command" in
 				exit 1
 				;;
 		esac
+		;;
+	ssh)
+		shift
+		if [ "$#" -lt 2 ] || [ "$#" -gt 3 ] || [ "$1" != setup ]; then
+			echo "Usage: ./dot ssh setup <personal|work> [hostname]" >&2
+			exit 1
+		fi
+		shift
+		bash "$DOTFILES_DIR/scripts/git-ssh.sh" "$@"
 		;;
 	colima)
 		colima_command="${2:-setup}"
