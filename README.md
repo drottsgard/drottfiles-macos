@@ -15,3 +15,7 @@ cd drottfiles-macos
 ## Updates
 
 Run `git pull` to get changes. Rerun `./dot stow` when config files are added and `./dot package install` when the Brewfile changes.
+
+## Inspiration
+
+Inspired by [dmmulroy’s dotfiles](https://github.com/dmmulroy/.dotfiles/).
