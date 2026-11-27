@@ -23,6 +23,10 @@
       "superlogical": {
         "type": "remote",
         "url": "https://www.superlogical.com/rex/community-mcp"
+      },
+      "figma-remote": {
+        "type": "remote",
+        "url": "https://mcp.figma.com/mcp"
       }
     }
   },
